@@ -9,6 +9,7 @@ BASE_URL = 'https://westcentralus.api.cognitive.microsoft.com/face/v1.0'
 CF.BaseUrl.set(BASE_URL)
 
 GROUP_ID = "bitpump"
+CF.person_group.train(GROUP_ID)
 
 
 class ImageVerifier(object):
@@ -16,6 +17,7 @@ class ImageVerifier(object):
     def add_face(cls, full_name, image):
         person_id = CF.person.create(GROUP_ID, name=full_name).get('personId')
         CF.person.add_face(image, GROUP_ID, person_id)
+        CF.person_group.train(GROUP_ID)
         return person_id
 
     @classmethod
@@ -27,7 +29,7 @@ class ImageVerifier(object):
         results = CF.face.identify(face_ids=face_ids,
                                    person_group_id=GROUP_ID,
                                    max_candidates_return=1,
-                                   threshold=0.8)
+                                   threshold=0.5)
 
         person_id_list = []
         for result in results:

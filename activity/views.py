@@ -128,7 +128,15 @@ class ActivityUpdateView(BaseApiView):
         # verify image
         for activity_image in models.ActivityImage.objects.filter(activity=db_user_activity.activity):
             image_url = image_upload(os.path.basename(activity_image.image.path), activity_image.image.path)
-            data = ImageVerifier.find_user_in_image(image_url)
+            person_ids = ImageVerifier.find_user_in_image(image_url)
+            users = list(models.User.objects.filter(azure_person_id__in=person_ids))
+            user_ids = [user.id for user in users]
+            user_ids_in_activity = [
+                user_activity.user.id
+                for user_activity in models.UserActivity.objects.filter(activity=db_user_activity.activity)
+            ]
+            if not set(user_ids_in_activity).issubset(user_ids):
+                raise exceptions.ImageVerifyFailException()
 
         with transaction.atomic():
             db_user_activity.activity.status = data['status']
