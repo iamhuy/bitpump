@@ -35,7 +35,8 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.staticfiles',
-    'app_user'
+    'app_user',
+    'activity'
 )
 
 REST_FRAMEWORK = {

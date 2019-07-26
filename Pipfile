@@ -10,6 +10,7 @@ djangorestframework = "==3.6.3"
 Django = "==1.11.2"
 mysql-python = "*"
 pillow = "*"
+cognitive-face = "*"
 
 [requires]
 python_version = "2.7"
