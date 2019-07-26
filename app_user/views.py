@@ -53,10 +53,10 @@ class UserLoginView(BaseApiView):
 
         if serializer.is_valid():
             data = serializer.validated_data
-            user = models.User.objects.filter(email=data['email'])
+            user = models.User.objects.filter(email=data['email']).first()
             if not user:
                 raise ObjectNotFoundException()
-            if hashlib.sha256(request['password'] + user.salt).hexdigest() != user.password_hash:
+            if hashlib.sha256(data['password'] + user.salt).hexdigest() != user.password_hash:
                 raise InputIsInvalidException()
             request.session['uid'] = user.id
             return self.reply()
@@ -66,21 +66,22 @@ class UserLoginView(BaseApiView):
 
 class UserInfoUpdateView(BaseApiView):
     http_method_names = ['post']
+    parser_classes = (MultiPartParser,)
     serializer_class = serializers.UserInfoUpdateSerializer
 
     def post_valid(self, serializer):
         data = serializer.validated_data
 
         with transaction.atomic():
-            user = models.User.objects.filter(id=self.uid)
+            user = models.User.objects.filter(id=self.uid).first()
             self.copy_to_db(data, user, field_list=['full_name'])
             image = data.get('file')
             if image:
                 user.image = image
             user.save()
-            if data.attribute_ids:
+            if data['attribute_ids']:
                 models.UserAttribute.objects.filter(user=user).delete()
-                attributes = models.Attribute.objects.filter(id__in=data.attribute_ids)
+                attributes = models.Attribute.objects.filter(id__in=data['attribute_ids'])
                 for attribute in attributes:
                     user_attribute = models.UserAttribute(
                         user=user,
