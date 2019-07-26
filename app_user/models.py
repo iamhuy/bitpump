@@ -10,6 +10,7 @@ class User(models.Model):
     password_hash = models.CharField(max_length=64)
     image = models.ImageField(upload_to='profile/', null=True, max_length=255)
     total_point = models.BigIntegerField()
+    azure_person_id = models.CharField(max_length=64, default='')
 
     class Meta:
         db_table = 'user_tab'

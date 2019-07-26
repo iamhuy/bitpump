@@ -1,12 +1,16 @@
 import time
+import os
 from rest_framework.parsers import MultiPartParser
 from django.db import transaction
 
 from common.views import BaseApiView
+from common.image_upload import image_upload
 from common import exceptions
 
 from . import serializers
 from . import models
+
+from activity.image_verifier import ImageVerifier
 
 
 class ActivityCategoryGetView(BaseApiView):
@@ -122,6 +126,17 @@ class ActivityUpdateView(BaseApiView):
             raise exceptions.LocationVerifyFailException()
 
         # verify image
+        for activity_image in models.ActivityImage.objects.filter(activity=db_user_activity.activity):
+            image_url = image_upload(os.path.basename(activity_image.image.path), activity_image.image.path)
+            person_ids = ImageVerifier.find_user_in_image(image_url)
+            users = list(models.User.objects.filter(azure_person_id__in=person_ids))
+            user_ids = [user.id for user in users]
+            user_ids_in_activity = [
+                user_activity.user.id
+                for user_activity in models.UserActivity.objects.filter(activity=db_user_activity.activity)
+            ]
+            if not set(user_ids_in_activity).issubset(user_ids):
+                raise exceptions.ImageVerifyFailException()
 
         with transaction.atomic():
             db_user_activity.activity.status = data['status']

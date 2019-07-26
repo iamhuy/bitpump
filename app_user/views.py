@@ -1,13 +1,17 @@
 import hashlib, uuid
 import json
+import os
 from django.db import transaction
 from rest_framework.parsers import MultiPartParser
 
 from common.views import BaseApiView
+from common.image_upload import image_upload
 from common.exceptions import DuplicateUserEmailException, ObjectNotFoundException, InputIsInvalidException
 
 from . import serializers
 from . import models
+
+from activity.image_verifier import ImageVerifier
 
 
 class UserRegisterView(BaseApiView):
@@ -35,18 +39,24 @@ class UserRegisterView(BaseApiView):
                     password_hash=password_hash,
                     image=data['image'],
                     total_point=0,
+                    azure_person_id='',
                 )
+                user.save()
+
+                image_url = image_upload(os.path.basename(user.image.path), user.image.path)
+                person_id = ImageVerifier.add_face(user.full_name, image_url)
+                user.azure_person_id = person_id
                 user.save()
 
                 age_attr = models.Attribute.objects.get(name='Age')
                 gender_attr = models.Attribute.objects.get(name='Gender')
                 team_attr = models.Attribute.objects.get(name='Team')
 
-                models.UserAttribute.objects.bulk_create(
+                models.UserAttribute.objects.bulk_create([
                     models.UserAttribute(user=user, attribute=age_attr, value=str(data['age'])),
                     models.UserAttribute(user=user, attribute=gender_attr, value=data['gender']),
                     models.UserAttribute(user=user, attribute=team_attr, value=data['team']),
-                )
+                ])
                 request.session['uid'] = user.id
                 return self.reply()
         else:

@@ -40,8 +40,8 @@ class UserLuckyDraw(models.Model):
 class Activity(models.Model):
     id = BigAutoField(primary_key=True)
     activity_category = models.ForeignKey(ActivityCategory, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)
-    longitude = models.DecimalField(max_digits=20, decimal_places=6)
-    latitude = models.DecimalField(max_digits=20, decimal_places=6)
+    longitude = models.DecimalField(max_digits=20, decimal_places=10)
+    latitude = models.DecimalField(max_digits=20, decimal_places=10)
     time = PositiveBigIntegerField()
     place_name = models.CharField(max_length=255, default='')
     expiry_time = PositiveBigIntegerField()
