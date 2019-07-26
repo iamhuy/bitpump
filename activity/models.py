@@ -18,7 +18,7 @@ class ActivityCategory(models.Model):
 class UserLuckyDraw(models.Model):
     id = BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)
-    activity = models.ForeignKey(ActivityCategory, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)
+    activity_category = models.ForeignKey(ActivityCategory, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)
 
     add_time = PositiveBigIntegerField()
     upd_time = PositiveBigIntegerField()
@@ -44,7 +44,7 @@ class Activity(models.Model):
     longitude = models.DecimalField(max_digits=5, decimal_places=6)
     latitude = models.DecimalField(max_digits=5, decimal_places=6)
     time = PositiveBigIntegerField()
-    last_ = PositiveBigIntegerField()
+    place_name = models.CharField()
 
     STATUS_INIT = 1
     STATUS_COMPLETED = 2

@@ -27,6 +27,7 @@ class UserAttribute(models.Model):
     id = BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)
     attribute = models.ForeignKey(Attribute, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)
+    value = models.CharField(max_length=128)
 
     class Meta:
         db_table = 'user_attribute_tab'
