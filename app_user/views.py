@@ -37,6 +37,16 @@ class UserRegisterView(BaseApiView):
                     total_point=0,
                 )
                 user.save()
+
+                age_attr = models.Attribute.objects.get(name='Age')
+                gender_attr = models.Attribute.objects.get(name='Gender')
+                team_attr = models.Attribute.objects.get(name='Team')
+
+                models.UserAttribute.objects.bulk_create(
+                    models.UserAttribute(user=user, attribute=age_attr, value=str(data['age'])),
+                    models.UserAttribute(user=user, attribute=gender_attr, value=data['gender']),
+                    models.UserAttribute(user=user, attribute=team_attr, value=data['team']),
+                )
                 request.session['uid'] = user.id
                 return self.reply()
         else:
@@ -72,6 +82,8 @@ class UserInfoUpdateView(BaseApiView):
 
     def post_valid(self, serializer):
         data = serializer.validated_data
+        ignore_attr_ids = list(
+            models.Attribute.objects.filter(name__in=['Age', 'Gender', 'Team']).values_list('id', flat=True))
 
         with transaction.atomic():
             db_user = models.User.objects.filter(id=self.uid).first()
@@ -82,7 +94,8 @@ class UserInfoUpdateView(BaseApiView):
                 db_user.save()
             if data['attributes']:
                 attributes = [json.loads(attribute) for attribute in data['attributes']]
-                attribute_id_attribute = {attribute['id']: attribute for attribute in attributes}
+                attribute_id_attribute = {attribute['id']: attribute for attribute in attributes
+                                          if attribute['id'] not in ignore_attr_ids}
                 models.UserAttribute.objects.filter(user=db_user).delete()
                 db_attributes = models.Attribute.objects.filter(id__in=attribute_id_attribute.keys())
                 for db_attribute in db_attributes:
@@ -134,6 +147,23 @@ class AttributeGetView(BaseApiView):
                 for attribute in attributes
             ]
         })
+
+
+# class UserRankingGetView(BaseApiView):
+#     http_method_names = ['get']
+#     serializer_class = serializers.UserRankingSerializer
+#
+#     def get_valid(self, serializer):
+#         attributes = models.User.objects.all()
+#         return self.reply({
+#             'attributes': [
+#                 {
+#                     'id': attribute.id,
+#                     'name': attribute.name,
+#                 }
+#                 for attribute in attributes
+#             ]
+#         })
 
 
 
