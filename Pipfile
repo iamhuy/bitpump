@@ -12,6 +12,7 @@ mysql-python = "*"
 pillow = "*"
 cognitive-face = "*"
 django-crontab = "*"
+cloudinary = "*"
 
 [requires]
 python_version = "2.7"

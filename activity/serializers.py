@@ -15,8 +15,8 @@ class LocationSerializer(serializers.Serializer):
 class ActivityUpdateSerializer(serializers.Serializer):
     activity_id = serializers.IntegerField()
     status = serializers.IntegerField()
-    latitude = serializers.DecimalField(min_value=0, decimal_places=6, max_digits=20)
-    longitude = serializers.DecimalField(min_value=0, decimal_places=6, max_digits=20)
+    latitude = serializers.DecimalField(min_value=0, decimal_places=10, max_digits=20)
+    longitude = serializers.DecimalField(min_value=0, decimal_places=10, max_digits=20)
 
 
 class ActivityImageUploadSerializer(serializers.Serializer):
