@@ -6,13 +6,22 @@ import traceback
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import permissions
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.authentication import SessionAuthentication
 
 from common.config import default_logger
 from common import exceptions
+
+
+class IsAuthenticated(permissions.BasePermission):
+    """
+    Allows access only to authenticated users.
+    """
+
+    def has_permission(self, request, view):
+        return request.session.get('uid', 0)
 
 
 class BaseApiView(APIView):
@@ -38,6 +47,9 @@ class BaseApiView(APIView):
         default_logger.error(msg)
         return super(BaseApiView, self).handle_exception(exc)
 
+    def _init_context(self, request):
+        self.uid = request.session['uid']
+
     def get(self, request, *args, **kwargs):
         if self.http_get_serializer_class is None:
             return self.get_valid(None)
@@ -45,6 +57,7 @@ class BaseApiView(APIView):
         serializer = self.http_get_serializer_class(data=request.GET)
 
         if serializer.is_valid():
+            self._init_context(request)
             return self.get_valid(serializer)
         else:
             return self.input_invalid(serializer)
@@ -59,6 +72,7 @@ class BaseApiView(APIView):
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
+            self._init_context(request)
             return self.post_valid(serializer)
         else:
             return self.input_invalid(serializer)
@@ -110,3 +124,11 @@ class BaseApiView(APIView):
         default_logger.info(msg)
 
         return Response(dict_data)
+
+    def copy_to_db(self, request_data, db_object, field_list):
+        if not request_data:
+            return
+
+        for field in field_list:
+            if field in request_data:
+                setattr(db_object, field, request_data[field])

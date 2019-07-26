@@ -1,11 +1,11 @@
 from django.db import models
 
-from common.field import PositiveBigIntegerField
+from common.field import PositiveBigIntegerField, BigAutoField
 from app_user.models import User
 
 
 class ActivityCategory(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)
     complete_point = models.IntegerField()
     reject_point = models.IntegerField()
@@ -16,7 +16,7 @@ class ActivityCategory(models.Model):
 
 
 class UserLuckyDraw(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)
     activity = models.ForeignKey(ActivityCategory, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)
 
@@ -39,11 +39,12 @@ class UserLuckyDraw(models.Model):
 
 
 class Activity(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = BigAutoField(primary_key=True)
     activity_category = models.ForeignKey(ActivityCategory, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)
     longitude = models.DecimalField(max_digits=5, decimal_places=6)
     latitude = models.DecimalField(max_digits=5, decimal_places=6)
     time = PositiveBigIntegerField()
+    last_ = PositiveBigIntegerField()
 
     STATUS_INIT = 1
     STATUS_COMPLETED = 2
@@ -52,7 +53,7 @@ class Activity(models.Model):
     status = models.PositiveSmallIntegerField(
         choices=(
             (STATUS_INIT, 'Init'),
-            (STATUS_COMPLETED, 'Accepted'),
+            (STATUS_COMPLETED, 'Completed'),
             (STATUS_REJECTED, 'Rejected'),
             (STATUS_EXPIRED, 'Expired'),
         ),
@@ -60,7 +61,13 @@ class Activity(models.Model):
     )
 
 
+class ActivityImage(models.Model):
+    id = BigAutoField(primary_key=True)
+    activity = models.ForeignKey(Activity, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)
+    image = models.ImageField(upload_to='activity/', null=True, max_length=255)
+
+
 class UserActivity(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)
     activity = models.ForeignKey(Activity, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)

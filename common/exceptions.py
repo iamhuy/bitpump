@@ -32,6 +32,16 @@ class SystemErrorException(APIException):
     default_detail = "System Error"
 
 
-class InputIsInvalidException(SystemErrorException):
+class DuplicateUserEmailException(APIException):
     error_code = 2
+    default_detail = 'User email is duplicate'
+
+
+class ObjectNotFoundException(APIException):
+    error_code = 3
+    default_detail = 'Object not found'
+
+
+class InputIsInvalidException(SystemErrorException):
+    error_code = 4
     default_detail = 'Input parameters are invalid'
