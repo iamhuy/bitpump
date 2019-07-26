@@ -11,6 +11,7 @@ Django = "==1.11.2"
 mysql-python = "*"
 pillow = "*"
 cognitive-face = "*"
+django-crontab = "*"
 
 [requires]
 python_version = "2.7"
