@@ -29,7 +29,7 @@ class UserRegisterView(BaseApiView):
             with transaction.atomic():
                 user = models.User.objects.select_for_update().filter(email=data['email'])
                 if user:
-                    raise DuplicateUserEmailException()
+                    raise DuplicateUserEmailException
                 salt = uuid.uuid4().hex
                 password_hash = hashlib.sha256(data['password'] + salt).hexdigest()
                 user = models.User(
@@ -76,9 +76,9 @@ class UserLoginView(BaseApiView):
             data = serializer.validated_data
             user = models.User.objects.filter(email=data['email']).first()
             if not user:
-                raise ObjectNotFoundException()
+                raise ObjectNotFoundException
             if hashlib.sha256(data['password'] + user.salt).hexdigest() != user.password_hash:
-                raise InputIsInvalidException()
+                raise InputIsInvalidException
             request.session['uid'] = user.id
             return self.reply()
         else:

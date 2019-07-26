@@ -44,13 +44,13 @@ class LuckyDrawUpdateView(BaseApiView):
                                                              models.UserLuckyDraw.STATUS_ACCEPTED,
                                                          ])
         if lucky_draw and lucky_draw.activity_category.id != data['activity_category_id']:
-            raise exceptions.InputIsInvalidException()
+            raise exceptions.InputIsInvalidException
 
         db_activity_category = models.ActivityCategory.objects.filter(
             id=data['activity_category_id']
         ).first()
         if not db_activity_category:
-            raise exceptions.ObjectNotFoundException()
+            raise exceptions.ObjectNotFoundException
 
         with transaction.atomic():
             if lucky_draw:
@@ -106,7 +106,7 @@ class ActivityUpdateView(BaseApiView):
                                                               ],
                                                               activity__id=data['activity_id']).first()
         if not db_user_activity:
-            raise exceptions.ObjectNotFoundException()
+            raise exceptions.ObjectNotFoundException
         with transaction.atomic():
             if data['status'] != models.Activity.STATUS_COMPLETED:
                 db_user_activity.activity.status = data['status']
@@ -123,7 +123,7 @@ class ActivityUpdateView(BaseApiView):
                                                   db_user_activity.activity.latitude,
                                                   db_user_activity.activity.longitude)
         if distance > 0.3:
-            raise exceptions.LocationVerifyFailException()
+            raise exceptions.LocationVerifyFailException
 
         # verify image
         for activity_image in models.ActivityImage.objects.filter(activity=db_user_activity.activity):
@@ -136,7 +136,7 @@ class ActivityUpdateView(BaseApiView):
                 for user_activity in models.UserActivity.objects.filter(activity=db_user_activity.activity)
             ]
             if not set(user_ids_in_activity).issubset(user_ids):
-                raise exceptions.ImageVerifyFailException()
+                raise exceptions.ImageVerifyFailException
 
         with transaction.atomic():
             db_user_activity.activity.status = data['status']
@@ -160,7 +160,7 @@ class ActivityImageUploadView(BaseApiView):
                                                               ],
                                                               activity__id=data['activity_id']).first()
         if not db_user_activity:
-            raise exceptions.ObjectNotFoundException()
+            raise exceptions.ObjectNotFoundException
 
         activity_image = models.ActivityImage(
             activity=db_user_activity.activity,
