@@ -149,21 +149,18 @@ class AttributeGetView(BaseApiView):
         })
 
 
-# class UserRankingGetView(BaseApiView):
-#     http_method_names = ['get']
-#     serializer_class = serializers.UserRankingSerializer
-#
-#     def get_valid(self, serializer):
-#         attributes = models.User.objects.all()
-#         return self.reply({
-#             'attributes': [
-#                 {
-#                     'id': attribute.id,
-#                     'name': attribute.name,
-#                 }
-#                 for attribute in attributes
-#             ]
-#         })
+class UserRankingGetView(BaseApiView):
+    http_method_names = ['get']
 
-
-
+    def get_valid(self, serializer):
+        users = models.User.objects.order_by('-total_point')[:10]
+        return self.reply({
+            'ranking': [
+                {
+                    'image': user.image,
+                    'point': user.total_point,
+                    'name': user.full_name
+                }
+                for user in users
+            ]
+        })
