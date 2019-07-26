@@ -19,9 +19,6 @@ class UserLuckyDraw(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)
     activity_category = models.ForeignKey(ActivityCategory, on_delete=models.DO_NOTHING, db_constraint=False, db_index=False)
 
-    add_time = PositiveBigIntegerField()
-    upd_time = PositiveBigIntegerField()
-
     STATUS_INIT = 1
     STATUS_ACCEPTED = 2
     STATUS_DENIED = 3
