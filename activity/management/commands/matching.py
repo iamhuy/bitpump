@@ -3,6 +3,7 @@ from activity.models import *
 from app_user.models import *
 import math
 import time
+from decimal import Decimal
 
 similar_weight = {
     'Age': 10,
@@ -16,19 +17,10 @@ similar_weight = {
 sum_weight = sum(similar_weight.values())
 
 activities = {
-    'Sports': [
-
-    ],
-    'English Talk': [
-
-    ],
-    'Hangout': [
-
-    ],
-    'Sharing': [
-
-    ]
-
+    'Running': ('Tao Dan stadium', Decimal('10.7571143'), Decimal('106.6417939')),
+    'English Talk': ('Sai gon center office', Decimal('10.7734937'), Decimal('106.698569')),
+    'Watch Movie': ('Landmark 81', Decimal('10.7935972'), Decimal('106.7198774')),
+    'Sharing': ('Sai gon center office', Decimal('10.7734937'), Decimal('106.698569')),
 }
 
 
@@ -53,7 +45,7 @@ class Command(BaseCommand):
             return 1
         return 0
 
-    def team_psoint(self, team1, team2):
+    def team_point(self, team1, team2):
         if team1 == team2:
             return 1
         return 0
@@ -132,9 +124,9 @@ class Command(BaseCommand):
 
             Activity.objects.create(
                 activity_category=category,
-                longtitude=0,
-                latitude=0,
-                place_name='',
+                longtitude=activities[category.name][1],
+                latitude=activities[category.name][2],
+                place_name=activities[category.name][0],
                 time=time.time(),
                 status=Activity.STATUS_INIT
             )
