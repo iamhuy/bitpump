@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'^login/$', views.UserLoginView.as_view(), name='login'),
     url(r'^info/update/$', views.UserInfoUpdateView.as_view(), name='update_info'),
     url(r'^info/get/$', views.UserInfoGetView.as_view(), name='get_info'),
+    url(r'^attribute/get/$', views.AttributeGetView.as_view(), name='get_attribute'),
 ]

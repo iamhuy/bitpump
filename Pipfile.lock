@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "cc21479b2d07bb0aa496aafe1e7287a7f92e2e3333de3629801cdd0ce05f1556"
+            "sha256": "baa2a8593ab9defe4fb5b4105105468a55a20446bbfe90dd5c2112abb36fe0dd"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,19 +16,38 @@
         ]
     },
     "default": {
+        "certifi": {
+            "hashes": [
+                "sha256:046832c04d4e752f37383b628bc601a7ea7211496b4638f6514d0e5b9acc4939",
+                "sha256:945e3ba63a0b9f577b1395204e13c3a231f9bc0223888be653286534e5873695"
+            ],
+            "version": "==2019.6.16"
+        },
+        "chardet": {
+            "hashes": [
+                "sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae",
+                "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"
+            ],
+            "version": "==3.0.4"
+        },
+        "cognitive-face": {
+            "hashes": [
+                "sha256:e486e78000288fbb00c2ccd42e0d1e09ba1a63fe9c78497d7b1d88b49d41828a",
+                "sha256:ef4fd24cdfa21ba24320a80dedfa8bbe283350b51db36aa9fbb924d69595bb73"
+            ],
+            "version": "==1.5.0"
+        },
         "django": {
             "hashes": [
                 "sha256:3c5b070482df4f9e5750539dc1824d353729ee423fd410c579b8cd3dea5b0617",
                 "sha256:cbd3944599086518cdcf3235e90230c8b8a9c5476b20447ee57b313dba14f67a"
             ],
-            "index": "pypi",
             "version": "==1.11.2"
         },
         "django-crontab": {
             "hashes": [
                 "sha256:1201810a212460aaaa48eb6a766738740daf42c1a4f6aafecfb1525036929236"
             ],
-            "index": "pypi",
             "version": "==0.7.1"
         },
         "djangorestframework": {
@@ -36,14 +55,20 @@
                 "sha256:6aa6aafdfb7f6152a401873ecae93aff9eb54d7a74266065347cf4de68278ae4",
                 "sha256:bb9d55997a71fb1c844cd84c15cbe2e87d2ec8493a685f96aa3db403760626b7"
             ],
-            "index": "pypi",
             "version": "==3.6.3"
+        },
+        "idna": {
+            "hashes": [
+                "sha256:c357b3f628cf53ae2c4c05627ecc484553142ca23264e593d327bcde5e9c3407",
+                "sha256:ea8b7f6188e6fa117537c3df7da9fc686d485087abf6ac197f9c46432f7e4a3c"
+            ],
+            "markers": "python_version >= '2.7' and python_version != '3.0.*' and python_version != '3.1.*' and python_version != '3.2.*' and python_version != '3.3.*'",
+            "version": "==2.8"
         },
         "mysql-python": {
             "hashes": [
                 "sha256:811040b647e5d5686f84db415efd697e6250008b112b6909ba77ac059e140c74"
             ],
-            "index": "pypi",
             "version": "==1.2.5"
         },
         "pillow": {
@@ -75,7 +100,6 @@
                 "sha256:ef6be704ae2bc8ad0ebc5cb850ee9139493b0fc4e81abcc240fb392a63ebc808",
                 "sha256:f8dc19d92896558f9c4317ee365729ead9d7bbcf2052a9a19a3ef17abbb8ac5b"
             ],
-            "index": "pypi",
             "version": "==6.1.0"
         },
         "pytz": {
@@ -85,6 +109,14 @@
             ],
             "version": "==2019.1"
         },
+        "requests": {
+            "hashes": [
+                "sha256:11e007a8a2aa0323f5a921e9e6a2d7e4e67d9877e85773fba9ba6419025cbeb4",
+                "sha256:9cf5292fcd0f598c671cfc1e0d7d1a7f13bb8085e9a590f48c010551dc6c4b31"
+            ],
+            "markers": "python_version >= '2.7' and python_version != '3.0.*' and python_version != '3.1.*' and python_version != '3.2.*' and python_version != '3.3.*'",
+            "version": "==2.22.0"
+        },
         "sqlparse": {
             "hashes": [
                 "sha256:40afe6b8d4b1117e7dff5504d7a8ce07d9a1b15aeeade8a2d10f130a834f8177",
@@ -92,6 +124,14 @@
             ],
             "markers": "python_version >= '2.7' and python_version != '3.0.*' and python_version != '3.1.*' and python_version != '3.2.*' and python_version != '3.3.*'",
             "version": "==0.3.0"
+        },
+        "urllib3": {
+            "hashes": [
+                "sha256:b246607a25ac80bedac05c6f282e3cdaf3afb65420fd024ac94435cabe6e18d1",
+                "sha256:dbe59173209418ae49d485b87d1681aefa36252ee85884c31346debd19463232"
+            ],
+            "markers": "python_version != '3.2.*' and python_version != '3.3.*' and python_version >= '2.7' and python_version != '3.0.*' and python_version != '3.1.*' and python_version < '4'",
+            "version": "==1.25.3"
         }
     },
     "develop": {}

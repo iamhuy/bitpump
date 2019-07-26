@@ -17,6 +17,6 @@ class UserLoginSerializer(serializers.Serializer):
 class UserInfoUpdateSerializer(serializers.Serializer):
     full_name = serializers.CharField(required=False)
     image = serializers.ImageField(required=False)
-    attribute_ids = serializers.ListField(child=serializers.IntegerField(), required=False, allow_empty=True)
+    attributes = serializers.ListField(child=serializers.CharField(), required=False, allow_empty=True)
 
 
