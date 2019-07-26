@@ -157,7 +157,7 @@ class UserRankingGetView(BaseApiView):
         return self.reply({
             'ranking': [
                 {
-                    'image': user.image,
+                    'image': user.image.url,
                     'point': user.total_point,
                     'name': user.full_name
                 }
