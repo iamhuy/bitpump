@@ -1,5 +1,6 @@
 import time
 from rest_framework.parsers import MultiPartParser
+from django.db import transaction
 
 from common.views import BaseApiView
 from common import exceptions
@@ -38,7 +39,7 @@ class LuckyDrawUpdateView(BaseApiView):
                                                              models.UserLuckyDraw.STATUS_INIT,
                                                              models.UserLuckyDraw.STATUS_ACCEPTED,
                                                          ])
-        if lucky_draw:
+        if lucky_draw and lucky_draw.activity_category.id != data['activity_category_id']:
             raise exceptions.InputIsInvalidException()
 
         db_activity_category = models.ActivityCategory.objects.filter(
@@ -47,14 +48,21 @@ class LuckyDrawUpdateView(BaseApiView):
         if not db_activity_category:
             raise exceptions.ObjectNotFoundException()
 
-        result = models.UserLuckyDraw(
-            user=db_user,
-            activity_category=db_activity_category,
-            add_time=time.time(),
-            upd_time=time.time(),
-            status=data['status']
-        )
-        result.save()
+        with transaction.atomic():
+            if lucky_draw:
+                lucky_draw.upd_time = time.time()
+                lucky_draw.status = data['status']
+                if lucky_draw.status == models.UserLuckyDraw.STATUS_DENIED:
+                    db_user.total_point -= db_activity_category.fail_point
+            else:
+                lucky_draw = models.UserLuckyDraw(
+                    user=db_user,
+                    activity_category=db_activity_category,
+                    add_time=time.time(),
+                    upd_time=time.time(),
+                    status=data['status']
+                )
+            lucky_draw.save()
         return self.reply()
 
 
@@ -95,12 +103,31 @@ class ActivityUpdateView(BaseApiView):
                                                               activity__id=data['activity_id']).first()
         if not db_user_activity:
             raise exceptions.ObjectNotFoundException()
-
-        if data['status'] != models.Activity.STATUS_COMPLETED:
-            db_user_activity.activity.status = data['status']
+        with transaction.atomic():
+            if data['status'] != models.Activity.STATUS_COMPLETED:
+                db_user_activity.activity.status = data['status']
+                db_user_activity.activity.save()
+                if data['status'] == models.Activity.STATUS_DENIED:
+                    db_user.total_point -= db_user_activity.activity.fail_point
+                    db_user.save()
+                return self.reply()
 
         # verify location
+        import location_verifier
+        distance = location_verifier.get_distance(data['latitude'],
+                                                  data['longitude'],
+                                                  db_user_activity.activity.latitude,
+                                                  db_user_activity.activity.longitude)
+        if distance > 0.3:
+            raise exceptions.LocationVerifyFailException()
+
         # verify image
+
+        with transaction.atomic():
+            db_user_activity.activity.status = data['status']
+            db_user_activity.activity.save()
+            db_user.total_point += db_user_activity.activity.fail_point
+            db_user.save()
         return self.reply()
 
 
