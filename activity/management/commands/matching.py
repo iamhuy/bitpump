@@ -4,6 +4,7 @@ from app_user.models import *
 import math
 import time
 from decimal import Decimal
+from django.db import transaction
 
 similar_weight = {
     'Age': 10,
@@ -132,9 +133,10 @@ class Command(BaseCommand):
             )
 
     def handle(self, *args, **options):
-        cur_draws = UserLuckyDraw.objects.filter(status=UserLuckyDraw.STATUS_INIT).all()
-        category_to_draws = {}
-        for draw in cur_draws:
-            category_to_draws.setdefault(draw.activity_category, []).append(draw)
-        for category, draws in category_to_draws.iteritems():
-            self.match_draws(category, draws)
+        with transaction.atomic():
+            cur_draws = UserLuckyDraw.objects.filter(status=UserLuckyDraw.STATUS_INIT).all()
+            category_to_draws = {}
+            for draw in cur_draws:
+                category_to_draws.setdefault(draw.activity_category, []).append(draw)
+            for category, draws in category_to_draws.iteritems():
+                self.match_draws(category, draws)
