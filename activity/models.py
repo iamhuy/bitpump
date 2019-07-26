@@ -46,7 +46,7 @@ class Activity(models.Model):
     longitude = models.DecimalField(max_digits=20, decimal_places=6)
     latitude = models.DecimalField(max_digits=20, decimal_places=6)
     time = PositiveBigIntegerField()
-    place_name = models.CharField()
+    place_name = models.CharField(max_length=255, default='')
     expiry_time = PositiveBigIntegerField()
 
     STATUS_INIT = 1

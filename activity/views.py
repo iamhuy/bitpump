@@ -164,6 +164,7 @@ class ActivityGetView(BaseApiView):
                         for activity_image in models.ActivityImage.objects.filter(activity=user_activity.activity)
                     },
                     'expiry_time': user_activity.activity.expiry_time,
+                    'place_name': user_activity.activity.place_name,
                     'status': user_activity.activity.status,
                 }
                 for user_activity in user_activities
