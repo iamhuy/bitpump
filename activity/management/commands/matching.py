@@ -1,3 +1,4 @@
+from __future__ import division
 from django.core.management.base import BaseCommand
 from activity.models import *
 from app_user.models import *
@@ -6,11 +7,12 @@ import time
 from decimal import Decimal
 from django.db import transaction
 
+
 similar_weight = {
     'Age': 10,
     'Gender': 1,
     'Team': 1,
-    'History': 100,
+    'History': 20,
     'tech': 1,
     'sports': 1,
     'hobby': 1
@@ -26,10 +28,6 @@ activities = {
 
 
 class Command(BaseCommand):
-
-    def add_arguments(self, parser):
-        parser.add_argument('poll_ids', nargs='+', type=int)
-
     def age_point(self, age1, age2):
         t = abs(age1-age2)
         if t < 3:
@@ -52,26 +50,35 @@ class Command(BaseCommand):
         return 0
 
     def similar_cal(self, user1, user2):
+        self.stdout.write('similar cal ' + user1.full_name + user2.full_name)
         diff_vec = []
 
         attr1 = {}
         attr2 = {}
-        for x in UserAttribute.objects.filter(user__id=user1.id).alls():
-            attr1[x.name] = x.value
-        for x in UserAttribute.objects.filter(user__id=user2.id).alls():
-            attr2[x.name] = x.value
+        for x in UserAttribute.objects.filter(user__id=user1.id).all():
+            attr1[x.attribute.name] = x.value
+        for x in UserAttribute.objects.filter(user__id=user2.id).all():
+            attr2[x.attribute.name] = x.value
 
-        activities = set(UserActivity.objects.fitler(user__id=user1.id).values_list('activity__id', flat=True)) & (
-            UserActivity.objects.fitler(user__id=user1.id).values_list('activity__id', flat=True))
+        activities = set(
+            UserActivity.objects.filter(user__id=user1.id,
+                                        activity__status=Activity.STATUS_COMPLETED).values_list('activity__id', flat=True)
+        ) & set(
+            UserActivity.objects.filter(user__id=user2.id,
+                                        activity__status=Activity.STATUS_COMPLETED).values_list('activity__id', flat=True))
+
+        self.stdout.write(str(list(UserActivity.objects.filter(user__id=user1.id).values_list('activity__id', flat=True))))
+        self.stdout.write(str(list(UserActivity.objects.filter(user__id=user2.id).values_list('activity__id', flat=True))))
         if len(activities) > 0:
             diff_vec.append(similar_weight['History']/sum_weight)
 
-        diff_vec.append(similar_weight['Age'] / sum_weight * self.age_point(attr1['Age'], attr2['Age']))
+        diff_vec.append(similar_weight['Age'] / sum_weight * self.age_point(int(attr1['Age']), int(attr2['Age'])))
 
         diff_vec.append(similar_weight['Gender'] / sum_weight * self.gender_point(attr1['Gender'], attr2['Gender']))
 
         diff_vec.append(similar_weight['Team'] / sum_weight * self.team_point(attr1['Team'], attr2['Team']))
 
+        self.stdout.write(str(diff_vec))
         similarity = math.sqrt(sum([x*x for x in diff_vec]))
 
         return similarity
@@ -115,6 +122,10 @@ class Command(BaseCommand):
                             optimal_pair = (user1, user2)
 
             user1, user2 = optimal_pair
+            self.stdout.write(user1.full_name)
+            self.stdout.write(user2.full_name)
+
+            print 'a'
             draw_user_1, draw_user_2 = user_to_draw[user1], user_to_draw[user2]
             users.remove(user1)
             users.remove(user2)
@@ -123,20 +134,33 @@ class Command(BaseCommand):
             draw_user_2.status = UserLuckyDraw.STATUS_MATCHED
             draw_user_2.save()
 
-            Activity.objects.create(
+            cur_time = time.time()
+
+            activity = Activity.objects.create(
                 activity_category=category,
-                longtitude=activities[category.name][1],
+                longitude=activities[category.name][1],
                 latitude=activities[category.name][2],
                 place_name=activities[category.name][0],
                 time=time.time(),
+                expiry_time = cur_time + 24 * 3600,
                 status=Activity.STATUS_INIT
+            )
+            UserActivity.objects.create(
+                user=user1,
+                activity=activity
+            )
+            UserActivity.objects.create(
+                user=user2,
+                activity=activity
             )
 
     def handle(self, *args, **options):
-        with transaction.atomic():
-            cur_draws = UserLuckyDraw.objects.filter(status=UserLuckyDraw.STATUS_INIT).all()
-            category_to_draws = {}
-            for draw in cur_draws:
-                category_to_draws.setdefault(draw.activity_category, []).append(draw)
-            for category, draws in category_to_draws.iteritems():
-                self.match_draws(category, draws)
+        for i in range(5):
+            with transaction.atomic():
+                cur_draws = UserLuckyDraw.objects.filter(status=UserLuckyDraw.STATUS_ACCEPTED).all()
+                category_to_draws = {}
+                for draw in cur_draws:
+                    category_to_draws.setdefault(draw.activity_category, []).append(draw)
+                for category, draws in category_to_draws.iteritems():
+                    self.match_draws(category, draws)
+            time.sleep(10)

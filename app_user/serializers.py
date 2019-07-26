@@ -7,6 +7,9 @@ class UserRegisterSerializer(serializers.Serializer):
     password = serializers.CharField()
     full_name = serializers.CharField()
     image = serializers.ImageField()
+    gender = serializers.CharField()
+    team = serializers.CharField()
+    age = serializers.IntegerField()
 
 
 class UserLoginSerializer(serializers.Serializer):
