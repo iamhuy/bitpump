@@ -155,10 +155,12 @@ class Command(BaseCommand):
             )
 
     def handle(self, *args, **options):
-        with transaction.atomic():
-            cur_draws = UserLuckyDraw.objects.filter(status=UserLuckyDraw.STATUS_ACCEPTED).all()
-            category_to_draws = {}
-            for draw in cur_draws:
-                category_to_draws.setdefault(draw.activity_category, []).append(draw)
-            for category, draws in category_to_draws.iteritems():
-                self.match_draws(category, draws)
+        for i in range(5):
+            with transaction.atomic():
+                cur_draws = UserLuckyDraw.objects.filter(status=UserLuckyDraw.STATUS_ACCEPTED).all()
+                category_to_draws = {}
+                for draw in cur_draws:
+                    category_to_draws.setdefault(draw.activity_category, []).append(draw)
+                for category, draws in category_to_draws.iteritems():
+                    self.match_draws(category, draws)
+            time.sleep(10)
