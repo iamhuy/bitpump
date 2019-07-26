@@ -10,6 +10,8 @@ from . import models
 
 
 class UserRegisterView(BaseApiView):
+    http_method_names = ['post']
+
     permission_classes = ()
     parser_classes = (MultiPartParser,)
     serializer_class = serializers.UserRegisterSerializer
@@ -20,17 +22,18 @@ class UserRegisterView(BaseApiView):
         if serializer.is_valid():
             data = serializer.validated_data
             with transaction.atomic():
-                user = models.User.objects.select_for_update(email=data['email'])
+                user = models.User.objects.select_for_update().filter(email=data['email'])
                 if user:
                     raise DuplicateUserEmailException()
                 salt = uuid.uuid4().hex
-                password_hash = hashlib.sha256(request['password'] + user.salt).hexdigest()
+                password_hash = hashlib.sha256(data['password'] + salt).hexdigest()
                 user = models.User(
                     email=data['email'],
                     full_name=data['full_name'],
                     salt=salt,
                     password_hash=password_hash,
                     image=data['image'],
+                    total_point=0,
                 )
                 user.save()
                 request.session['uid'] = user.id
@@ -40,6 +43,8 @@ class UserRegisterView(BaseApiView):
 
 
 class UserLoginView(BaseApiView):
+    http_method_names = ['post']
+
     permission_classes = ()
     serializer_class = serializers.UserLoginSerializer
 
@@ -60,6 +65,7 @@ class UserLoginView(BaseApiView):
 
 
 class UserInfoUpdateView(BaseApiView):
+    http_method_names = ['post']
     serializer_class = serializers.UserInfoUpdateSerializer
 
     def post_valid(self, serializer):
@@ -85,16 +91,17 @@ class UserInfoUpdateView(BaseApiView):
 
 
 class UserInfoGetView(BaseApiView):
+    http_method_names = ['get']
     serializer_class = serializers.UserLoginSerializer
 
     def get_valid(self, serializer):
-        user = models.User.objects.filter(id=self.uid)
+        user = models.User.objects.filter(id=self.uid).first()
         user_attributes = models.UserAttribute.objects.filter(user=user)
-        return {
+        return self.reply({
             'user': {
                 'email': user.email,
                 'full_name': user.full_name,
-                'image': user.image
+                'image': user.image.url
             },
             'attribute': [
                 {
@@ -103,6 +110,6 @@ class UserInfoGetView(BaseApiView):
                 }
                 for user_attribute in user_attributes
             ]
-        }
+        })
 
 

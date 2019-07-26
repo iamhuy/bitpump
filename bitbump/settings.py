@@ -110,5 +110,11 @@ USE_L10N = True
 
 USE_TZ = True
 
+STATIC_URL = '/static/'
+
 MEDIA_ROOT = '/bitpump/media'
 MEDIA_URL = '/media/'
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
+
+APPEND_SLASH = False

@@ -51,13 +51,13 @@ class BaseApiView(APIView):
         self.uid = request.session['uid']
 
     def get(self, request, *args, **kwargs):
+        self._init_context(request)
         if self.http_get_serializer_class is None:
             return self.get_valid(None)
 
         serializer = self.http_get_serializer_class(data=request.GET)
 
         if serializer.is_valid():
-            self._init_context(request)
             return self.get_valid(serializer)
         else:
             return self.input_invalid(serializer)
@@ -66,13 +66,13 @@ class BaseApiView(APIView):
         return self.reply()
 
     def post(self, request, *args, **kwargs):
+        self._init_context(request)
         if self.serializer_class is None:
             return self.post_valid(None)
 
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
-            self._init_context(request)
             return self.post_valid(serializer)
         else:
             return self.input_invalid(serializer)
