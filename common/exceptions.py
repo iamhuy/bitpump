@@ -45,3 +45,13 @@ class ObjectNotFoundException(APIException):
 class InputIsInvalidException(SystemErrorException):
     error_code = 4
     default_detail = 'Input parameters are invalid'
+
+
+class LocationVerifyFailException(SystemErrorException):
+    error_code = 5
+    default_detail = 'Location verify fail'
+
+
+class ImageVerifyFailException(SystemErrorException):
+    error_code = 6
+    default_detail = 'Image verify fail'

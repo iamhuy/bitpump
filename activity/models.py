@@ -48,13 +48,13 @@ class Activity(models.Model):
 
     STATUS_INIT = 1
     STATUS_COMPLETED = 2
-    STATUS_REJECTED = 3
+    STATUS_DENIED = 3
     STATUS_EXPIRED = 4
     status = models.PositiveSmallIntegerField(
         choices=(
             (STATUS_INIT, 'Init'),
             (STATUS_COMPLETED, 'Completed'),
-            (STATUS_REJECTED, 'Rejected'),
+            (STATUS_DENIED, 'Denied'),
             (STATUS_EXPIRED, 'Expired'),
         ),
         default=STATUS_INIT,
