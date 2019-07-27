@@ -220,19 +220,19 @@ class UserConnectionGetView(BaseApiView):
         for user in available_users:
             company_total_point += user.total_point
 
-        values = {user.id: str(float(user.total_point) / float(company_total_point))
+        values = {user.id: str((float(user.total_point) / float(company_total_point) + 1) / 2.0)
                   for user in available_users}
-        values = [values.get(node, 0.45) for node in graph.nodes()]
+        values = [values.get(node, 0.5) for node in graph.nodes()]
 
         edge_labels = dict([((u, v,), d['weight'])
                             for u, v, d in graph.edges(data=True)])
 
-        node_labels = {user.id: user.full_name for user in available_users}
+        node_labels = {user.id: user.full_name for user in available_users if user.id in graph.nodes}
         edge_colors = ['black' for _ in graph.edges()]
         pos = nx.spring_layout(graph)
-        nx.draw_networkx_labels(graph, pos, node_labels, font_size=11)
+        nx.draw_networkx_labels(graph, pos, node_labels, font_size=5, font_color='w')
         nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels)
-        nx.draw(graph, pos, node_color=values, node_size=3500, edge_color=edge_colors, arrows=False)
+        nx.draw(graph, pos, node_size=1500, edge_color=edge_colors, arrows=False)
 
         # Plot the graph
         plt.title('Company Connections')

@@ -102,7 +102,7 @@ class ActivityUpdateView(BaseApiView):
                                                               activity__status__in=[
                                                                   models.Activity.STATUS_INIT,
                                                               ],
-                                                              activity__id=data['activity_id']).first()
+                                                              activity__id=data['id']).first()
         if not db_user_activity:
             raise exceptions.ObjectNotFoundException
         with transaction.atomic():
@@ -116,11 +116,11 @@ class ActivityUpdateView(BaseApiView):
 
         # verify location
         import location_verifier
-        distance = location_verifier.get_distance(data['latitude'],
-                                                  data['longitude'],
+        distance = location_verifier.get_distance(data['long'],
+                                                  data['lat'],
                                                   db_user_activity.activity.latitude,
                                                   db_user_activity.activity.longitude)
-        if distance > 0.3:
+        if distance > 5:
             raise exceptions.LocationVerifyFailException
 
         # verify image
@@ -143,6 +143,7 @@ class ActivityUpdateView(BaseApiView):
             db_user_activity.activity.save()
             for user_activity in user_activities:
                 user_activity.user.total_point += db_user_activity.activity.activity_category.complete_point
+                user_activity.user.save()
                 # delete lucky draw
                 models.UserLuckyDraw.objects.filter(user=user_activity.user,
                                                     activity_category=user_activity.activity.activity_category,
@@ -151,7 +152,6 @@ class ActivityUpdateView(BaseApiView):
                                                         models.UserLuckyDraw.STATUS_ACCEPTED,
                                                         models.UserLuckyDraw.STATUS_MATCHED,
                                                     ]).delete()
-            db_user.save()
         return self.reply()
 
 
@@ -167,7 +167,7 @@ class ActivityImageUploadView(BaseApiView):
                                                               activity__status__in=[
                                                                   models.Activity.STATUS_INIT,
                                                               ],
-                                                              activity__id=data['activity_id']).first()
+                                                              activity__id=data['id']).first()
         if not db_user_activity:
             raise exceptions.ObjectNotFoundException
 
@@ -203,6 +203,7 @@ class ActivityGetView(BaseApiView):
                             "id": user_activity.user.id,
                             "full_name": user_activity.user.full_name,
                             "image": user_activity.user.image.url,
+                            "email": user_activity.user.email,
                         }
                         for user_activity in models.UserActivity.objects.filter(activity=user_activity.activity)
                     ],

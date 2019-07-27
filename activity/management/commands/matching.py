@@ -24,6 +24,7 @@ activities = {
     'English Talk': ('Sai gon center office', Decimal('10.7734937'), Decimal('106.698569')),
     'Watch Movie': ('Landmark 81', Decimal('10.7935972'), Decimal('106.7198774')),
     'Sharing': ('Sai gon center office', Decimal('10.7734937'), Decimal('106.698569')),
+    'Hackathon': ('Sai gon center office', Decimal('10.7734937'), Decimal('106.698569')),
 }
 
 

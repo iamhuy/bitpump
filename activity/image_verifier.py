@@ -8,7 +8,7 @@ CF.Key.set(KEY)
 BASE_URL = 'https://westcentralus.api.cognitive.microsoft.com/face/v1.0'
 CF.BaseUrl.set(BASE_URL)
 
-GROUP_ID = "bitpump"
+GROUP_ID = "bitpump_live_2"
 CF.person_group.train(GROUP_ID)
 
 
