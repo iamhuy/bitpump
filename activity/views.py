@@ -42,7 +42,7 @@ class LuckyDrawUpdateView(BaseApiView):
                                                          status__in=[
                                                              models.UserLuckyDraw.STATUS_INIT,
                                                              models.UserLuckyDraw.STATUS_ACCEPTED,
-                                                         ])
+                                                         ]).first()
         if lucky_draw and lucky_draw.activity_category.id != data['activity_category_id']:
             raise exceptions.InputIsInvalidException
 
@@ -62,8 +62,6 @@ class LuckyDrawUpdateView(BaseApiView):
                 lucky_draw = models.UserLuckyDraw(
                     user=db_user,
                     activity_category=db_activity_category,
-                    add_time=time.time(),
-                    upd_time=time.time(),
                     status=data['status']
                 )
             lucky_draw.save()
@@ -126,22 +124,33 @@ class ActivityUpdateView(BaseApiView):
             raise exceptions.LocationVerifyFailException
 
         # verify image
-        for activity_image in models.ActivityImage.objects.filter(activity=db_user_activity.activity):
+        user_activities = models.UserActivity.objects.filter(activity=db_user_activity.activity)
+        user_images = models.ActivityImage.objects.filter(activity=db_user_activity.activity)
+        for activity_image in user_images:
             image_url = image_upload(os.path.basename(activity_image.image.path), activity_image.image.path)
             person_ids = ImageVerifier.find_user_in_image(image_url)
             users = list(models.User.objects.filter(azure_person_id__in=person_ids))
             user_ids = [user.id for user in users]
             user_ids_in_activity = [
                 user_activity.user.id
-                for user_activity in models.UserActivity.objects.filter(activity=db_user_activity.activity)
-            ]
+                for user_activity in user_activities]
             if not set(user_ids_in_activity).issubset(user_ids):
+                user_images.delete()
                 raise exceptions.ImageVerifyFailException
 
         with transaction.atomic():
             db_user_activity.activity.status = data['status']
             db_user_activity.activity.save()
-            db_user.total_point += db_user_activity.activity.fail_point
+            for user_activity in user_activities:
+                user_activity.user.total_point += db_user_activity.activity.activity_category.complete_point
+                # delete lucky draw
+                models.UserLuckyDraw.objects.filter(user=user_activity.user,
+                                                    activity_category=user_activity.activity.activity_category,
+                                                    status__in=[
+                                                        models.UserLuckyDraw.STATUS_INIT,
+                                                        models.UserLuckyDraw.STATUS_ACCEPTED,
+                                                        models.UserLuckyDraw.STATUS_MATCHED,
+                                                    ]).delete()
             db_user.save()
         return self.reply()
 

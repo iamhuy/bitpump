@@ -11,5 +11,6 @@ urlpatterns = [
     url(r'^info/update/$', views.UserInfoUpdateView.as_view(), name='update_info'),
     url(r'^info/get/$', views.UserInfoGetView.as_view(), name='get_info'),
     url(r'^attribute/get/$', views.AttributeGetView.as_view(), name='get_attribute'),
-    url(r'^ranking/get/$', views.UserRankingGetView.as_view(), name='get_ranking')
+    url(r'^ranking/get/$', views.UserRankingGetView.as_view(), name='get_ranking'),
+    url(r'^connection_graph/get/$', views.UserConnectionGetView.as_view(), name='get_connection_graph'),
 ]

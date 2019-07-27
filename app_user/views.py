@@ -161,6 +161,7 @@ class AttributeGetView(BaseApiView):
 
 class UserRankingGetView(BaseApiView):
     http_method_names = ['get']
+    permission_classes = ()
 
     def get_valid(self, serializer):
         users = models.User.objects.order_by('-total_point')[:10]
@@ -173,4 +174,71 @@ class UserRankingGetView(BaseApiView):
                 }
                 for user in users
             ]
+        })
+
+
+class UserConnectionGetView(BaseApiView):
+    http_method_names = ['get']
+    permission_classes = ()
+
+    def get_valid(self, serializer):
+        import matplotlib.pyplot as plt
+        import networkx as nx
+        import time
+        import datetime
+        from django.conf import settings
+        from activity import models as activity_models
+
+        now = datetime.datetime.now()
+        image_name = settings.MEDIA_ROOT + "/connections/connections_%s_%s_%s.png" % (now.year, now.month, now.day)
+        image_url = settings.MEDIA_URL + "connections/connections_%s_%s_%s.png" % (now.year, now.month, now.day)
+        if os.path.exists(image_name):
+            return self.reply({
+                'image': image_url
+            })
+        available_users = models.User.objects.all()
+        user_activities = activity_models.UserActivity.objects.filter(
+            activity__time__gt=time.time() - 30 * 24 * 3600,
+            activity__status=activity_models.Activity.STATUS_COMPLETED
+        )
+
+        activity_users_list = {}
+        for user_activity in user_activities:
+            activity_users_list.setdefault(user_activity.activity, []).append(user_activity.user)
+
+        users_map = {}  # {(u1, u2): weight}
+        for users in activity_users_list.values():
+            users_map.setdefault((users[0], users[1]), 0)
+            users_map[(users[0], users[1])] += 1
+
+        graph = nx.DiGraph()  # Create a graph object called G
+        for users, weight in users_map.items():
+            graph.add_edges_from(
+                [(users[0].id, users[1].id)], weight=weight
+            )
+        company_total_point = 0
+        for user in available_users:
+            company_total_point += user.total_point
+
+        values = {user.id: str(float(user.total_point) / float(company_total_point))
+                  for user in available_users}
+        values = [values.get(node, 0.45) for node in graph.nodes()]
+
+        edge_labels = dict([((u, v,), d['weight'])
+                            for u, v, d in graph.edges(data=True)])
+
+        node_labels = {user.id: user.full_name for user in available_users}
+        edge_colors = ['black' for _ in graph.edges()]
+        pos = nx.spring_layout(graph)
+        nx.draw_networkx_labels(graph, pos, node_labels, font_size=11)
+        nx.draw_networkx_edge_labels(graph, pos, edge_labels=edge_labels)
+        nx.draw(graph, pos, node_color=values, node_size=3500, edge_color=edge_colors, arrows=False)
+
+        # Plot the graph
+        plt.title('Company Connections')
+        plt.axis('off')
+        plt.savefig(image_name)
+
+        return self.reply({
+            'image': image_url
         })
