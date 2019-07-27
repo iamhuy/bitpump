@@ -58,7 +58,7 @@ class UserRegisterView(BaseApiView):
                     models.UserAttribute(user=user, attribute=team_attr, value=data['team']),
                 ])
                 request.session['uid'] = user.id
-                return self.reply()
+                return self.reply({'uid': user.id})
         else:
             return self.input_invalid(serializer)
 
@@ -80,7 +80,7 @@ class UserLoginView(BaseApiView):
             if hashlib.sha256(data['password'] + user.salt).hexdigest() != user.password_hash:
                 raise InputIsInvalidException
             request.session['uid'] = user.id
-            return self.reply()
+            return self.reply({'uid': user.id})
         else:
             return self.input_invalid(serializer)
 
