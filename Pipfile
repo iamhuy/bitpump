@@ -7,7 +7,7 @@ name = "pypi"
 
 [packages]
 djangorestframework = "==3.6.3"
-Django = "==1.11.2"
+Django = "==1.11.29"
 mysql-python = "*"
 pillow = "*"
 cognitive-face = "*"
